@@ -112,6 +112,7 @@ namespace Compilador_sensor
 
         private void button1_Click(object sender, EventArgs e)
         {
+            //Disparar análisis Léxico
             AnalizadorLexico analizador = new AnalizadorLexico();
             ComponenteLexico Componente = analizador.DevolverComponenteLexico();
 

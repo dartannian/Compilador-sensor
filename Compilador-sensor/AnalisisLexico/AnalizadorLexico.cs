@@ -1797,7 +1797,7 @@ namespace Compilador_sensor.AnalisisLexico
 
         private bool EsFinLinea()
         {
-            return "@FL@".Equals(CaracterActual);
+            return "@FL@".Equals(CaracterActual) || EsSlashR();
         }
 
         private void FormarLexema()
