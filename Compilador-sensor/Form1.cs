@@ -1,5 +1,6 @@
 ﻿using Compilador_sensor.AnalisisLexico;
 using Compilador_sensor.Transversal;
+using Compilador_sensor.AnalizadorSintactico;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,18 +24,16 @@ namespace Compilador_sensor
             InitializeComponent();
         }
 
-        private void RbtnArchivo_CheckedChanged(object sender, EventArgs e)
+        private void RbtnArchivo_CheckedChanged_1(object sender, EventArgs e)
         {
             if (RbtnArchivo.Checked) // SI EL USUARIO ELIGE ESA OPCIÓN, ENTONCES CAMBIAMOS LA GRAFICA
             {
+                
                 BtnCarga.Show();
                 
-               // BtnCarga.Location = new Point(656, 14);
                 TxtArchivo.Show();
                 txtConsola.Hide();
                 BtnCarga.Location = new Point(512, 44);
-                //this.Width = 845;
-                //this.Height = 351;
                 this.CenterToScreen();
             }
         }
@@ -84,7 +83,6 @@ namespace Compilador_sensor
             {
                 OpenFile.Filter = "Text Files(.txt)| *.txt"; // mostrarme solo los archivos .txt
                 
-                // OpenFileDialog.ShowDialog() nos ayuda a abrir una ventana para buscar el archivo
                 if (OpenFile.ShowDialog() == DialogResult.OK)
                 {
                     ArchivoReference = OpenFile.FileName; // obtener la referencia del archivo
@@ -110,30 +108,73 @@ namespace Compilador_sensor
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click_1(object sender, EventArgs e)
         {
-            //Disparar análisis Léxico
-            AnalizadorLexico analizador = new AnalizadorLexico();
-            ComponenteLexico Componente = analizador.DevolverComponenteLexico();
-
-            while (!Categoria.FIN_ARCHIVO.Equals(Componente.ObtenerCategoria()))
+            try
             {
-                MessageBox.Show(Componente.ToString());
-                Componente = analizador.DevolverComponenteLexico();
+                AnalizadorSintactico.AnalizadorSintactico AnalizadorSintactico = new AnalizadorSintactico.AnalizadorSintactico();
+                AnalizadorSintactico.Analizar(enableDebug.Checked);
             }
-
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
             MessageBox.Show("Análisis finalizado.");
         }
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Global.Form = this;
+        }
+
+ 
+
         private void readconsole()
         {
-            
             string[] lineas = txtConsola.Text.Split('\n');
             for(int i=0;i<lineas.Length; i++)
             {
                 Cache.INSTANCIA.AgregarLinea(lineas[i]);
             }
             
+        }
+
+        public void LlenarTablas(ComponenteLexico Componente)
+        {
+            if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+            {
+                LlenarTablaLiterales(Componente);
+            }
+            else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+            {
+                LlenarTablaPalabrasReservadas(Componente);
+            }
+            else if (Tipo.DUMMY.Equals(Componente.ObtenerTipo()))
+            {
+                LlenarTablaDummies(Componente);
+            }
+
+        }
+
+        public void LlenarTablaLiterales(ComponenteLexico Componente)
+        {
+            dataGridViewLiterale.Rows.Add(Componente.ObtenerLexema(),
+               Componente.ObtenerCategoria(), Componente.ObtenerNumeroLinea(),
+               Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal());
+        }
+
+        public void LlenarTablaPalabrasReservadas(ComponenteLexico Componente)
+        {
+            dataGridViewPalRe.Rows.Add(Componente.ObtenerLexema(),
+                Componente.ObtenerCategoria(), Componente.ObtenerNumeroLinea(),
+                Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal());
+        }
+
+        public void LlenarTablaDummies(ComponenteLexico Componente)
+        {
+            dataGridViewDummy.Rows.Add(Componente.ObtenerLexema(),
+                Componente.ObtenerCategoria(), Componente.ObtenerNumeroLinea(),
+                Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal());
         }
     }
 }

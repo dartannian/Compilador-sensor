@@ -1813,7 +1813,6 @@ namespace Compilador_sensor.AnalisisLexico
                 || EsCaracterP() || EsCaracterR() || EsCaracterS() || EsCaracterT()
                 || EsCaracterU() || EsCaracterW() || EsDigitoBinario() || EsFinLinea()
                 || EsGuionBajo() || EsGuionMedio() || LineaActual.esFinArchivo();
-                //|| EsSlashR();
         }
 
         private bool EsSlashR()
