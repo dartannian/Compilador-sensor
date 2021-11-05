@@ -97,6 +97,7 @@ namespace Compilador_sensor
             this.dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn29 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn30 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.listBox1 = new System.Windows.Forms.ListBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -170,6 +171,7 @@ namespace Compilador_sensor
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.listBox1);
             this.groupBox2.Controls.Add(this.txtConsola);
             this.groupBox2.Controls.Add(this.TxtArchivo);
             this.groupBox2.Controls.Add(this.BtnCarga);
@@ -727,6 +729,14 @@ namespace Compilador_sensor
             this.dataGridViewTextBoxColumn30.Name = "dataGridViewTextBoxColumn30";
             this.dataGridViewTextBoxColumn30.ReadOnly = true;
             // 
+            // listBox1
+            // 
+            this.listBox1.FormattingEnabled = true;
+            this.listBox1.Location = new System.Drawing.Point(6, 72);
+            this.listBox1.Name = "listBox1";
+            this.listBox1.Size = new System.Drawing.Size(500, 95);
+            this.listBox1.TabIndex = 5;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -844,6 +854,7 @@ namespace Compilador_sensor
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn28;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn29;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn30;
+        private System.Windows.Forms.ListBox listBox1;
     }
 }
 
