@@ -14,7 +14,7 @@ using System.IO;
 
 namespace Compilador_sensor.AnalizadorSintactico
 {
-    public class AnalizadorSintactico 
+    public class AnalizadorSintactico
     {
         private AnalizadorLexico analizadorLexico = new AnalizadorLexico();
         private ComponenteLexico Componente;
@@ -24,12 +24,20 @@ namespace Compilador_sensor.AnalizadorSintactico
         {
             FormarEntrada(Nivel, "<Expresion>");
             if (Categoria.ENTRADA.Equals(Componente.ObtenerCategoria()))
-            { 
+            {
                 InstruccionEntrada(Nivel + 1);
+                if (!Categoria.FIN_ARCHIVO.Equals(Componente.ObtenerCategoria()))
+                {
+                    Expresion(1);
+                }
             }
             else if (Categoria.SALIDA.Equals(Componente.ObtenerCategoria()))
             {
                 InstruccionSalida(Nivel + 1);
+                if (!Categoria.FIN_ARCHIVO.Equals(Componente.ObtenerCategoria()))
+                {
+                    Expresion(1);
+                }
             }
             FormarSalida(Nivel, "<Expresion>");
         }
@@ -37,30 +45,107 @@ namespace Compilador_sensor.AnalizadorSintactico
         private void InstruccionEntrada(int Nivel)
         {
             FormarEntrada(Nivel, "<InstrucciónEntrada>");
-            if (Categoria.ENTRADA.Equals(Componente.ObtenerCategoria()))
+
+            Avanzar();
+            if (Categoria.OBTENER_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
             {
+                FormarEntrada(Nivel, "<ObtenerTemperatura>");
                 Avanzar();
-                if (Categoria.OBTENER_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
+                if (Categoria.UNIDAD_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
                 {
-                    FormarEntrada(Nivel, "<ObtenerTemperatura>");
-                    Avanzar();
-                    if (Categoria.UNIDAD_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
+                    UnidadTemperatura(Nivel + 1);
+                }
+                else
+                {
+                    if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
                     {
-                        UnidadTemperatura(Nivel + 1);
+                        Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
                     }
-                    FormarSalida(Nivel, "<ObtenerTemperatura>");
+                    else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                    }
+                    String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                    String Causa = "El componente no es valido para formar la expresión";
+                    String Solucion = "agregar componente valido";
+
+                    Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                    GestorErrores.ObtenerInstancia().Agregar(Error);
+                    throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
                 }
-                else if (Categoria.VALOR_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
-                {
-                    ValorTemperatura(Nivel + 1);
-                }
-                else if (Categoria.VALOR_ESTADO_SENSOR.Equals(Componente.ObtenerCategoria()))
-                {
-                    OrdenEstadoSensor(Nivel + 1);
-                }
+                FormarSalida(Nivel, "<ObtenerTemperatura>");
             }
+            else if (Categoria.VALOR_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
+            {
+                ValorTemperatura(Nivel + 1);
+                if (Categoria.UNIDAD_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
+                {
+                    UnidadTemperatura(Nivel + 1);
+                    if (Categoria.DECREMENTAR.Equals(Componente.ObtenerCategoria()) || Categoria.INCREMENTAR.Equals(Componente.ObtenerCategoria()))
+                    {
+                        Orden(Nivel + 1);
+                    }
+                    else
+                    {
+                        if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                        {
+                            Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                        }
+                        else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                        {
+                            Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                        }
+                        String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                        String Causa = "El componente no es valido para formar la expresión";
+                        String Solucion = "agregar componente valido";
+
+                        Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                        GestorErrores.ObtenerInstancia().Agregar(Error); throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+                    }
+                }
+                else
+                {
+                    if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                    }
+                    else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                    }
+                    String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                    String Causa = "El componente no es valido para formar la expresión";
+                    String Solucion = "agregar componente valido";
+
+                    Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                    GestorErrores.ObtenerInstancia().Agregar(Error); throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+                }
+
+            }
+            else if (Categoria.VALOR_ESTADO_SENSOR.Equals(Componente.ObtenerCategoria()))
+            {
+                OrdenEstadoSensor(Nivel + 1);
+            }
+            else
+            {
+                if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                {
+                    Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                }
+                else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                {
+                    Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                }
+                String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                String Causa = "El componente no es valido para formar la expresión";
+                String Solucion = "agregar componente valido";
+
+                Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                GestorErrores.ObtenerInstancia().Agregar(Error);
+                throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+            }
+
             FormarSalida(Nivel, "<InstrucciónEntrada>");
-            Expresion(1);
         }
 
         private void OrdenEstadoSensor(int Nivel)
@@ -75,6 +160,24 @@ namespace Compilador_sensor.AnalizadorSintactico
                     Avanzar();
                     FormarSalida(Nivel, "<EncenderSensor>");
                 }
+                else
+                {
+                    if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                    }
+                    else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                    }
+                    String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                    String Causa = "El componente no es valido para formar la expresión";
+                    String Solucion = "agregar componente valido";
+
+                    Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                    GestorErrores.ObtenerInstancia().Agregar(Error);
+                    throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+                }
             }
             if ("-11-".Equals(Componente.ObtenerLexema()))
             {
@@ -85,6 +188,24 @@ namespace Compilador_sensor.AnalizadorSintactico
                     Avanzar();
                     FormarSalida(Nivel, "<ApagarSensor>");
                 }
+                else
+                {
+                    if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                    }
+                    else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                    }
+                    String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                    String Causa = "El componente no es valido para formar la expresión";
+                    String Solucion = "agregar componente valido";
+
+                    Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                    GestorErrores.ObtenerInstancia().Agregar(Error);
+                    throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+                }
             }
             FormarSalida(Nivel, "<OrdenEstadoSensor>");
         }
@@ -93,10 +214,6 @@ namespace Compilador_sensor.AnalizadorSintactico
         {
             FormarEntrada(Nivel, "UnidadTemperatura>");
             Avanzar();
-            if(Categoria.DECREMENTAR.Equals(Componente.ObtenerCategoria()) || Categoria.INCREMENTAR.Equals(Componente.ObtenerCategoria()))
-            {
-                Orden(Nivel + 1);
-            }
             FormarSalida(Nivel, "<Unidademperatura>");
         }
 
@@ -104,10 +221,6 @@ namespace Compilador_sensor.AnalizadorSintactico
         {
             FormarEntrada(Nivel, "<ValorTemperatura>");
             Avanzar();
-            if (Categoria.UNIDAD_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
-            {
-                UnidadTemperatura(Nivel + 1);
-            }
             FormarSalida(Nivel, "<ValorTemperatura>");
         }
 
@@ -118,13 +231,52 @@ namespace Compilador_sensor.AnalizadorSintactico
             if (Categoria.VALOR_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
             {
                 ValorTemperatura(Nivel + 1);
+                if (Categoria.UNIDAD_TEMPERATURA.Equals(Componente.ObtenerCategoria()))
+                {
+                    UnidadTemperatura(Nivel + 1);
+                }
+                else
+                {
+                    if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                    }
+                    else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                    }
+                    String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                    String Causa = "El componente no es valido para formar la expresión";
+                    String Solucion = "agregar componente valido";
+
+                    Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                    GestorErrores.ObtenerInstancia().Agregar(Error);
+                    throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+                }
             }
             else if (Categoria.VALOR_ESTADO_SENSOR.Equals(Componente.ObtenerCategoria()))
             {
                 EstadoSensor(Nivel + 1);
             }
+            else
+            {
+                if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                {
+                    Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                }
+                else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                {
+                    Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                }
+                String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                String Causa = "El componente no es valido para formar la expresión";
+                String Solucion = "agregar componente valido";
+
+                Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                GestorErrores.ObtenerInstancia().Agregar(Error);
+                throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+            }
             FormarSalida(Nivel, "<InstrucciónSalida>");
-            Expresion(1);
         }
 
         private void EstadoSensor(int Nivel)
@@ -139,6 +291,24 @@ namespace Compilador_sensor.AnalizadorSintactico
                     Avanzar();
                     FormarSalida(Nivel, "<SensorApagado>");
                 }
+                else
+                {
+                    if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                    }
+                    else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                    }
+                    String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                    String Causa = "El componente no es valido para formar la expresión";
+                    String Solucion = "agregar componente valido";
+
+                    Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                    GestorErrores.ObtenerInstancia().Agregar(Error);
+                    throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
+                }
             }
             if ("-11-".Equals(Componente.ObtenerLexema()))
             {
@@ -148,12 +318,30 @@ namespace Compilador_sensor.AnalizadorSintactico
                     FormarEntrada(Nivel, "<SensorEncendido>");
                     Avanzar();
                     FormarSalida(Nivel, "<SensorEncendido>");
-                    
+
+                }
+                else
+                {
+                    if (Tipo.LITERAL.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewLiterale.Rows.RemoveAt(Global.Form.dataGridViewLiterale.Rows.Count - 2);
+                    }
+                    else if (Tipo.PALABRA_RESERVADA.Equals(Componente.ObtenerTipo()))
+                    {
+                        Global.Form.dataGridViewPalRe.Rows.RemoveAt(Global.Form.dataGridViewPalRe.Rows.Count - 2);
+                    }
+                    String Falla = "Componente no válido" + Componente.ObtenerLexema();
+                    String Causa = "El componente no es valido para formar la expresión";
+                    String Solucion = "agregar componente valido";
+
+                    Error Error = Error.Crear(Componente.ObtenerNumeroLinea(), Componente.ObtenerPosicionInicial(), Componente.ObtenerPosicionFinal(), Falla, Causa, Solucion, TipoError.SINTACTICO);
+                    GestorErrores.ObtenerInstancia().Agregar(Error);
+                    throw new Exception("Error tipo stopper durante el análisis sintactico, observe la terminal para la mas información sobre el error");
                 }
             }
             FormarSalida(Nivel, "<EstadoSensor>");
         }
-        private void Orden (int Nivel)
+        private void Orden(int Nivel)
         {
             FormarEntrada(Nivel, "<Orden>");
             Avanzar();
@@ -168,8 +356,8 @@ namespace Compilador_sensor.AnalizadorSintactico
 
             if (Depurar)
             {
-                //MessageBox.Show(Traza.ToString());
-                Console.WriteLine(Traza.ToString());
+                MessageBox.Show(Traza.ToString());
+                //Console.WriteLine(Traza.ToString());
             }
 
             if (GestorErrores.ObtenerInstancia().HayErrores())
@@ -202,7 +390,7 @@ namespace Compilador_sensor.AnalizadorSintactico
             Traza.Append("> ");
             Traza.Append("INICIO" + regla);
             Traza.Append("\n");
-            if(Nivel != 1)
+            if (Nivel != 1)
             {
                 FormarComponente(Nivel);
             }
@@ -227,6 +415,6 @@ namespace Compilador_sensor.AnalizadorSintactico
             }
             Traza.Append("Componente actual ").Append(this.Componente.ObtenerLexema()).Append("/").Append(this.Componente.ObtenerCategoria());
             Traza.Append("\n");
-        }    
+        }
     }
 }

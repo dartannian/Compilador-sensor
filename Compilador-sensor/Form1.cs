@@ -26,6 +26,9 @@ namespace Compilador_sensor
 
         private void RbtnArchivo_CheckedChanged_1(object sender, EventArgs e)
         {
+            dataGridViewDummy.Rows.Clear();
+            dataGridViewLiterale.Rows.Clear();
+            dataGridViewPalRe.Rows.Clear();
             if (RbtnArchivo.Checked) // SI EL USUARIO ELIGE ESA OPCIÓN, ENTONCES CAMBIAMOS LA GRAFICA
             {
                 
@@ -40,6 +43,10 @@ namespace Compilador_sensor
 
         private void RbtnConsola_CheckedChanged(object sender, EventArgs e)
         {
+            listBox1.Hide();
+            dataGridViewDummy.Rows.Clear();
+            dataGridViewLiterale.Rows.Clear();
+            dataGridViewPalRe.Rows.Clear();
             if (RbtnConsola.Checked)// SI EL USUARIO ELIGE ESA OPCIÓN, ENTONCES SE MUEVE EL BOTON DE CARGA
             {
                 BtnCarga.Show();
@@ -53,6 +60,7 @@ namespace Compilador_sensor
 
         private void BtnCarga_Click(object sender, EventArgs e)
         {
+           
             Cache.INSTANCIA.ReiniciarCache();
             if (RbtnArchivo.Checked)
             {
@@ -73,31 +81,35 @@ namespace Compilador_sensor
             }
             else
             {
-                MessageBox.Show("Por favor selecciona una opción", "Enginners Code", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                MessageBox.Show("Por favor selecciona una opción", "Programa Entrada", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
             }
         }
 
+    
+
         private void AbrirArchivo()
         {
+            listBox1.Show();
             try
             {
                 OpenFile.Filter = "Text Files(.txt)| *.txt"; // mostrarme solo los archivos .txt
-                
+                listBox1.Items.Clear();
                 if (OpenFile.ShowDialog() == DialogResult.OK)
                 {
                     ArchivoReference = OpenFile.FileName; // obtener la referencia del archivo
                     StreamReader streamReader = new StreamReader(ArchivoReference);  // leer el archivo
-                    
+                    int contador = 1;
                     while (true)
                     {
                         ActualLinea = streamReader.ReadLine(); // retorna la linea actual
                         Cache.INSTANCIA.AgregarLinea(ActualLinea);
-
+                        listBox1.Items.Add(contador + ". " + ActualLinea);
                         if (streamReader.EndOfStream) // si termina de leer el archivo completamente, parame el Stream y dale un break al Bucle While
                         {
                             streamReader.Close();
                             break;
                         }
+                        contador++;
                     }
 
                 }
@@ -119,12 +131,12 @@ namespace Compilador_sensor
             {
                 MessageBox.Show(exception.Message);
             }
-            MessageBox.Show("Análisis finalizado.");
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             Global.Form = this;
+            listBox1.Hide();
         }
 
  
